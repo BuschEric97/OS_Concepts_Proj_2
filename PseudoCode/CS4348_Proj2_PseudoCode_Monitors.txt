@@ -1,0 +1,22 @@
+monitor barrier {
+  int numThreads;
+  int threadCount;
+  Condition Variables:
+    atBarrier;
+
+  void arriveAndWait() {
+    threadCount++;
+
+    if (threadCount < numThreads)
+      atBarrier.wait();
+    else
+      atBarrier.signalAll();
+
+    threadCount--;
+  }
+
+  initialization_code(int numberOfThreads) {
+    numThreads = numberOfThreads;
+    threadCount = 0;
+  }
+}
