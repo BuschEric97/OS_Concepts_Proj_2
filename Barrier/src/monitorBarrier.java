@@ -6,30 +6,32 @@ public class monitorBarrier implements Barrier
 {
 	int numThreads;
 	int threadCount;
-	final Lock lock = new ReentrantLock();
-	final Condition atBarrier = lock.newCondition();
+	final Object atBarrier = new Object();
 
 	public monitorBarrier(int N)
 	{
 		numThreads = N;
 		threadCount = 0;
 	}
-	public synchronized void arriveAndWait()
+	public void arriveAndWait()
 	{
-		threadCount++; // increment threadCount to indicate a new thread is at the barrier
-
-		try
+		synchronized (atBarrier)
 		{
-			if (threadCount < numThreads)
-				atBarrier.await(); // wait at barrier if not all threads are at barrier
-			else
-				atBarrier.notifyAll(); // release all threads if all threads are at barrier
-		}
-		catch (InterruptedException e)
-		{
-			System.out.println(e);
-		}
+			threadCount++; // increment threadCount to indicate a new thread is at the barrier
 
-		threadCount--; // decrement threadCount to indicate thread has left the barrier
+			try
+			{
+				if (threadCount < numThreads)
+					atBarrier.wait(); // wait at barrier if not all threads are at barrier
+				else
+					atBarrier.notifyAll(); // release all threads if all threads are at barrier
+			}
+			catch (InterruptedException e)
+			{
+				System.out.println(e);
+			}
+
+			threadCount--; // decrement threadCount to indicate thread has left the barrier
+		}
 	}
 }
